@@ -312,6 +312,10 @@ were tried and dropped: `react-fast-marquee` is CJS-only and breaks Zudoku's SSR
 
 ## Open threads / things to explore
 
+### Parked research
+- **External API catalog** (specs in a separate repo, consumed at build): see `docs/api-center-research.md`.
+  Not integrated; specs stay in `apis/`.
+
 ### High priority (user showed interest)
 
 1. **Authentication** — Zudoku has native auth plugins for Clerk, Firebase, Supabase,
