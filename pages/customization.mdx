@@ -1,0 +1,129 @@
+---
+title: Customization Reference
+description: Qué se puede esconder, modificar o reemplazar en Zudoku
+---
+
+# Customization Reference
+
+Everything in Zudoku that can be shown, hidden, repositioned, or replaced.
+
+---
+
+## Header
+
+| What | Config key | Values | Notes |
+|------|-----------|--------|-------|
+| Theme switcher | `header.themeSwitcher.enabled` | `true` / `false` | Default: `true` |
+| Search position | `header.placements.search` | `"start"` `"center"` `"end"` | Default: `"end"` |
+| Nav position | `header.placements.navigation` | `"start"` `"center"` `"end"` | Default: `"start"` |
+| Auth button position | `header.placements.auth` | `"start"` `"center"` `"end"` `"navigation"` | Only with auth plugin |
+| Header nav links | `header.navigation` | Array of links / dropdowns | Appear in the first header row |
+| Logo | `site.logo.src` | `{ light, dark }` | Supports light/dark variants |
+| Site title | `site.title` | String | Shown when no logo is configured |
+| Sidebar toggle | `site.sidebar.collapsible` | `true` / `false` | Default: `true` |
+
+---
+
+## Page layout
+
+| What | Config key / prop | Values | Notes |
+|------|------------------|--------|-------|
+| Full layout removal | `layout` on `custom-page` | `"none"` `"default"` | `"none"` removes header + sidebar + footer |
+| Sidebar visibility | Navigation structure | Route in category → sidebar shows | Route at root level → no sidebar |
+
+---
+
+## API reference pages
+
+| What | Config key | Values | Notes |
+|------|-----------|--------|-------|
+| Version selector | `options.showVersionSelect` | `"always"` `"if-available"` `"hide"` | Default: `"if-available"` |
+| Try-it playground | `options.disablePlayground` | `true` / `false` | Hides the "Send" request panel |
+| Right sidecar panel | `options.disableSidecar` | `true` / `false` | Hides the entire right sidebar |
+| Request box | `options.disableRequestBox` | `true` / `false` | |
+| API info page | `options.showInfoPage` | `true` / `false` | The overview page with description |
+| Expand all tags | `options.expandAllTags` | `true` / `false` | Default: collapsed |
+| Code snippet language | `options.examplesLanguage` | `"curl"` `"js"` `"python"` etc. | |
+| Schema download button | `options.schemaDownload.enabled` | `true` / `false` | |
+| Security section | `options.disableSecurity` | `true` / `false` | |
+
+---
+
+## MDX pages (frontmatter)
+
+| What | Frontmatter key | Values | Notes |
+|------|----------------|--------|-------|
+| Right TOC sidebar | `toc` | `true` / `false` | Default: `true` — shows headings |
+| Page title | `title` | String | Shown in sidebar + `<title>` tag |
+| Meta description | `description` | String | Used for SEO |
+
+---
+
+## Footer
+
+The footer only renders when `site.footer` is configured. Without it the whole `<footer>` element returns `null` (including `footer-before` and `footer-after` slots).
+
+| What | Config key | Notes |
+|------|-----------|-------|
+| Enable footer | `site.footer.copyright` / `site.footer.columns` | Either field triggers the footer |
+| Link columns | `site.footer.columns` | Array of `{ title, links: [{ label, href }] }` |
+| Copyright text | `site.footer.copyright` | String |
+| Footer logo | `site.footer.logo` | Same shape as `site.logo` |
+| Social links | `site.footer.social` | Array of `{ href, icon, label }` |
+| Column alignment | `site.footer.position` | `"start"` `"center"` `"end"` |
+
+---
+
+## Slots (inject custom React content)
+
+See `/slots-demo` for a live visual of every slot.
+
+| Slot name | Where it renders | Visible on |
+|-----------|-----------------|-----------|
+| `layout-before-head` | Above the `<header>` | All pages |
+| `layout-after-head` | Between header and content grid | All pages |
+| `head-navigation-start` | Inside header, after logo | All pages |
+| `head-navigation-end` | Inside header, before theme switcher | All pages |
+| `top-navigation-before` | Above the top nav tabs row | All pages |
+| `top-navigation-after` | Below the top nav tabs row | All pages |
+| `navigation-before` | Top of left sidebar | Pages with sidebar only |
+| `navigation-after` | Bottom of left sidebar | Pages with sidebar only |
+| `content-before` | Inside `<main>`, before content | All pages (or mount-scoped with `<Slot.Source>`) |
+| `content-after` | Inside `<main>`, after content | All pages (or mount-scoped with `<Slot.Source>`) |
+| `footer-before` | Inside `<footer>`, before columns | When `site.footer` is set |
+| `footer-after` | Inside `<footer>`, after columns | When `site.footer` is set |
+| `mobile-top-bar-end` | End of mobile top bar | Mobile viewport only |
+
+**Two registration modes:**
+
+```tsx
+// Global — active on every page:
+const config: ZudokuConfig = {
+  slots: { "head-navigation-end": <MyBadge /> },
+};
+
+// Component-scoped — active only while the component is mounted:
+import { Slot } from "zudoku/components";
+
+function MyPage() {
+  return (
+    <>
+      <Slot.Source name="content-before">
+        <MyAlert />
+      </Slot.Source>
+      {/* page content */}
+    </>
+  );
+}
+```
+
+---
+
+## What is NOT customizable via config
+
+These are hardcoded in the Zudoku source and cannot be overridden through the config API:
+
+- All UI text strings: "On this page", "Send", "Query Parameters", "Path Parameters", "Cancel", "Copy", etc.
+- Language / i18n — no locale system exists
+- The Header component itself — can only inject into it via slots, not replace it
+- The Sidebar component structure — can only inject before/after via slots

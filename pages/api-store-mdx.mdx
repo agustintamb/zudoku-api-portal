@@ -1,0 +1,65 @@
+---
+title: API Catalog (MDX)
+description: Misma pantalla que el API Store pero escrita en MDX usando FeatureGrid
+---
+
+# API Catalog — MDX version
+
+This is the **MDX counterpart** of the [API Store custom page](/api-store).
+Both show the same catalog; this one is authored in `.mdx` using the `<FeatureGrid>` component registered globally via `mdx.components`.
+
+---
+
+## Available APIs
+
+<FeatureGrid
+  columns={3}
+  items={[
+    {
+      icon: "🐾",
+      title: "Petstore API",
+      description: "The classic OpenAPI example. Pets, store inventory, and user management. 20 endpoints.",
+      href: "/api",
+    },
+    {
+      icon: "✍️",
+      title: "Blog API",
+      description: "Posts, comments, and authors. Full CRUD with pagination and filtering. 9 endpoints.",
+      href: "/blog-api",
+    },
+    {
+      icon: "🔐",
+      title: "Auth API",
+      description: "JWT auth service. Register, login, token refresh, password reset. 8 endpoints.",
+      href: "/auth-api",
+    },
+  ]}
+/>
+
+---
+
+## MDX vs customPage
+
+<CalloutBox variant="info" title="Two approaches for the same content">
+  The `/api-store` React customPage uses `zudoku/ui` Card and Badge components with full TypeScript logic.
+  This MDX version uses the `FeatureGrid` custom component registered in `mdx.components`.
+  Both are valid — choose MDX for content-heavy pages, React for stateful/interactive pages.
+</CalloutBox>
+
+### When to use MDX
+
+- Documentation content that needs formatting (headings, tables, code blocks)
+- Pages where non-developers might edit the content
+- Static or near-static content with occasional custom components
+
+### When to use customPage
+
+- Pages with state (`useState`, `useReducer`)
+- Pages with navigation logic (`useNavigate`, `useParams`)
+- Dashboards, forms, or any interactive UI
+- Pages that fetch data dynamically
+
+<CalloutBox variant="tip" title="You can mix both">
+  A `customPage` can render MDX content via Zudoku's `Markdown` component from `zudoku/components`.
+  And MDX pages can embed fully interactive React components via `mdx.components`.
+</CalloutBox>

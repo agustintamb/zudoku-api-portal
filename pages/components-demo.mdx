@@ -1,0 +1,153 @@
+---
+title: Custom Components Demo
+description: Demostración de componentes React custom registrados como MDX components en zudoku.config.tsx
+---
+
+# Custom Components Demo
+
+This page shows how to register and use custom React components inside `.mdx` files via Zudoku's `mdx.components` config option.
+
+In [zudoku.config.tsx](zudoku.config.tsx), components are registered like this:
+
+```tsx
+mdx: {
+  components: {
+    CalloutBox,
+    FeatureGrid,
+  },
+},
+```
+
+Once registered, you can use them directly in any `.mdx` file — no imports needed.
+
+---
+
+## CalloutBox
+
+A custom callout with five variants: `info`, `warning`, `success`, `error`, and `tip`.
+
+<CalloutBox variant="info" title="Information">
+  This is an **info** callout. Use it to highlight important notes or context. Supports markdown-ish children.
+</CalloutBox>
+
+<CalloutBox variant="warning" title="Watch out">
+  This is a **warning** callout. Use it for deprecation notices, breaking changes, or prerequisites.
+</CalloutBox>
+
+<CalloutBox variant="success" title="You did it!">
+  This is a **success** callout. Use it to confirm a completed step or a working configuration.
+</CalloutBox>
+
+<CalloutBox variant="error" title="Error">
+  This is an **error** callout. Use it to explain failure modes, error responses, or invalid states.
+</CalloutBox>
+
+<CalloutBox variant="tip" title="Pro tip">
+  This is a **tip** callout. Use it for shortcuts, best practices, or non-obvious advice.
+</CalloutBox>
+
+---
+
+## FeatureGrid
+
+A responsive grid of feature cards, each with an icon, title, description, and optional link.
+
+<FeatureGrid
+  columns={3}
+  items={[
+    {
+      icon: "📖",
+      title: "MDX Support",
+      description: "Write docs in Markdown with JSX components embedded anywhere.",
+      href: "/introduction",
+    },
+    {
+      icon: "🔌",
+      title: "OpenAPI Integration",
+      description: "Point to a YAML spec and get a fully interactive API reference.",
+      href: "/api",
+    },
+    {
+      icon: "🎨",
+      title: "Theming",
+      description: "Override colors, fonts, and radius via the theme config.",
+      href: "/components-demo",
+    },
+    {
+      icon: "🧩",
+      title: "Custom Pages",
+      description: "Mount React components as full pages with customPages.",
+      href: "/api-store",
+    },
+    {
+      icon: "⚙️",
+      title: "Plugins",
+      description: "Extend Zudoku with plugins for search, auth, API keys, and more.",
+      href: "/introduction",
+    },
+    {
+      icon: "🌗",
+      title: "Dark Mode",
+      description: "Built-in dark/light mode switcher. Theme vars adapt automatically.",
+      href: "/introduction",
+    },
+  ]}
+/>
+
+---
+
+## Two-column FeatureGrid
+
+<FeatureGrid
+  columns={2}
+  items={[
+    {
+      icon: "🚀",
+      title: "Getting Started",
+      description: "Clone the repo, run `npm run dev`, and you're live in under a minute.",
+      href: "/introduction",
+    },
+    {
+      icon: "📦",
+      title: "Zero Config",
+      description: "A single `zudoku.config.tsx` drives the entire site — navigation, APIs, theme, and pages.",
+      href: "/introduction",
+    },
+  ]}
+/>
+
+---
+
+## Mixing Markdown and Components
+
+Standard Markdown works alongside custom components with no extra setup.
+
+### Code blocks
+
+```bash
+npm run dev
+# starts the Zudoku dev server
+```
+
+```typescript
+// Register components in zudoku.config.tsx
+mdx: {
+  components: {
+    CalloutBox,
+    FeatureGrid,
+  },
+},
+```
+
+### Tables
+
+| Component | Source | Usage |
+|-----------|--------|-------|
+| `CalloutBox` | `src/components/CalloutBox.tsx` | Callouts in MDX |
+| `FeatureGrid` | `src/components/FeatureGrid.tsx` | Feature grids in MDX |
+| `LandingPage` | `zudoku/components` | Custom page at `/home` |
+| `Card` / `Badge` | `zudoku/ui/*` | API Store page |
+
+<CalloutBox variant="tip" title="Key takeaway">
+  Any React component you register under `mdx.components` becomes a global JSX tag available in every `.mdx` file in the project — no per-file import needed.
+</CalloutBox>
