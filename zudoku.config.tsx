@@ -7,7 +7,7 @@ import { CalloutBox } from "./src/components/CalloutBox";
 import { FeatureGrid } from "./src/components/FeatureGrid";
 import { LayoutBeforeHead } from "./src/slots/LayoutBeforeHead";
 import { HeadNavigationStart } from "./src/slots/HeadNavigationStart";
-import { HeadNavigationEnd } from "./src/slots/HeadNavigationEnd";
+import { SlotToggle } from "./src/slots/SlotToggle";
 import { TopNavigationBefore } from "./src/slots/TopNavigationBefore";
 import { TopNavigationAfter } from "./src/slots/TopNavigationAfter";
 import { NavigationBefore } from "./src/slots/NavigationBefore";
@@ -22,6 +22,7 @@ const config: ZudokuConfig = {
       src: { light: "/logo-light.svg", dark: "/logo-dark.svg" },
       alt: "Zudoku",
       width: "130px",
+      href: "/home",
     },
     // Footer only renders when site.footer is configured — otherwise the
     // <Footer> component returns null, and footer-before/footer-after slots
@@ -153,7 +154,7 @@ const config: ZudokuConfig = {
               type: "link",
               icon: "book",
               label: "Zudoku Docs",
-              to: "https://zudoku.dev/docs/",
+              to: "https://zudoku.dev/docs/quickstart/",
             },
           ],
         },
@@ -186,7 +187,7 @@ const config: ZudokuConfig = {
           },
           {
             label: "Zudoku Docs",
-            to: "https://zudoku.dev/docs/",
+            to: "https://zudoku.dev/docs/quickstart",
             target: "_blank",
           },
         ],
@@ -211,7 +212,7 @@ const config: ZudokuConfig = {
   slots: {
     "layout-before-head":    <LayoutBeforeHead />,
     "head-navigation-start": <HeadNavigationStart />,
-    "head-navigation-end":   <HeadNavigationEnd />,
+    "head-navigation-end":   <SlotToggle />,
     "top-navigation-before": <TopNavigationBefore />,
     "top-navigation-after":  <TopNavigationAfter />,
     "navigation-before":     <NavigationBefore />,

@@ -1,27 +1,39 @@
+import { useSyncExternalStore } from "react";
 import { Slot } from "zudoku/components";
+import { slotStore } from "../slots/slotVisibility";
 import { SlotBar, SlotTag } from "../slots/SlotTag";
 
 // content-before and content-after are registered here via Slot.Source.
 // They only activate while this page is mounted — unlike config.slots which are global.
 // This demonstrates per-page slot injection without affecting other pages.
 export function SlotsDemoPage() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+
   return (
     <>
-      <Slot.Source name="content-before">
-        <SlotBar
-          name="content-before"
-          description="above page content in <main> — active only on this page via Slot.Source"
-          color="#f43f5e"
-        />
-      </Slot.Source>
+      {visible && (
+        <Slot.Source name="content-before">
+          <SlotBar
+            name="content-before"
+            description="above page content in <main> — active only on this page via Slot.Source"
+            color="#f43f5e"
+          />
+        </Slot.Source>
+      )}
 
-      <Slot.Source name="content-after">
-        <SlotBar
-          name="content-after"
-          description="below page content in <main> — active only on this page via Slot.Source"
-          color="#ec4899"
-        />
-      </Slot.Source>
+      {visible && (
+        <Slot.Source name="content-after">
+          <SlotBar
+            name="content-after"
+            description="below page content in <main> — active only on this page via Slot.Source"
+            color="#ec4899"
+          />
+        </Slot.Source>
+      )}
 
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
         <p

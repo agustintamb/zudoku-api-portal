@@ -1,10 +1,14 @@
+import { useSyncExternalStore } from "react";
+import { slotStore } from "./slotVisibility";
 import { SlotBar } from "./SlotTag";
 
-// Slot: footer-before
-// Renders inside <footer>, before the columns grid.
-// Only visible when site.footer is configured (footer returns null otherwise).
-// Useful for: newsletter signup, footer CTA, status indicator.
 export function FooterBefore() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+  if (!visible) return null;
   return (
     <SlotBar
       name="footer-before"

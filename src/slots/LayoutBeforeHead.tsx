@@ -1,9 +1,14 @@
+import { useSyncExternalStore } from "react";
+import { slotStore } from "./slotVisibility";
 import { SlotBar } from "./SlotTag";
 
-// Slot: layout-before-head
-// Renders immediately above the <header> element, outside the header DOM node.
-// Useful for: announcement banners, maintenance notices, cookie consent bars.
 export function LayoutBeforeHead() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+  if (!visible) return null;
   return (
     <SlotBar
       name="layout-before-head"

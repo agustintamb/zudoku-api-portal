@@ -8,8 +8,8 @@ export function LandingPage() {
       title="Build faster with our APIs"
       description="Explore interactive API documentation, test endpoints in real-time, and integrate in minutes. Three APIs available — Petstore, Blog, and Auth."
       actions={[
-        { label: "Browse APIs", href: "/api-store", variant: "primary" },
-        { label: "Read the Docs", href: "/introduction", variant: "outlined" },
+        { label: "Browse APIs", href: "/api-store", variant: "link" },
+        { label: "Read the Docs", href: "/introduction", variant: "ghost" },
       ]}
     />
   );

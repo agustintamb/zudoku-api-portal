@@ -1,14 +1,5 @@
-import { SlotTag } from "./SlotTag";
+// This file is no longer used — replaced by SlotToggle.tsx which combines
+// the toggle button and the head-navigation-end indicator in one component.
+// Kept as a reference for the slot's color/description.
 
-// Slot: head-navigation-end
-// Renders inside the header bar, after the nav links and before the theme switcher.
-// Useful for: CTA button, user status indicator, notification badge.
-export function HeadNavigationEnd() {
-  return (
-    <SlotTag
-      name="head-navigation-end"
-      description="inside header, before theme switcher"
-      color="#eab308"
-    />
-  );
-}
+export {};

@@ -1,9 +1,14 @@
+import { useSyncExternalStore } from "react";
+import { slotStore } from "./slotVisibility";
 import { SlotTag } from "./SlotTag";
 
-// Slot: head-navigation-start
-// Renders inside the header bar, right after the logo and before the search box.
-// Useful for: environment badge, org switcher, secondary nav items.
 export function HeadNavigationStart() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+  if (!visible) return null;
   return (
     <SlotTag
       name="head-navigation-start"

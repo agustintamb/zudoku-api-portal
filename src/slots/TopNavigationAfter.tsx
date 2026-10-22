@@ -1,9 +1,14 @@
+import { useSyncExternalStore } from "react";
+import { slotStore } from "./slotVisibility";
 import { SlotBar } from "./SlotTag";
 
-// Slot: top-navigation-after
-// Renders below the top navigation tabs row.
-// Useful for: sub-navigation, progress indicator, contextual toolbar.
 export function TopNavigationAfter() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+  if (!visible) return null;
   return (
     <SlotBar
       name="top-navigation-after"

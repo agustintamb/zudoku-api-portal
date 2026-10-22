@@ -1,10 +1,14 @@
+import { useSyncExternalStore } from "react";
+import { slotStore } from "./slotVisibility";
 import { SlotBar } from "./SlotTag";
 
-// Slot: footer-after
-// Renders inside <footer>, after the columns grid and before the copyright bar.
-// Only visible when site.footer is configured.
-// Useful for: legal links, cookie preferences, secondary footer content.
 export function FooterAfter() {
+  const visible = useSyncExternalStore(
+    slotStore.subscribe,
+    slotStore.getSnapshot,
+    slotStore.getServerSnapshot,
+  );
+  if (!visible) return null;
   return (
     <SlotBar
       name="footer-after"
