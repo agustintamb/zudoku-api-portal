@@ -8,9 +8,9 @@ A hands-on exploration project built on top of **Zudoku v0.93** to map the bound
 
 | API | Path | Notes |
 |-----|------|-------|
-| Petstore | `/api` | Unmodified classic example |
-| Blog API | `/blog-api` | **Versioned** — v1 and v2 with selector |
-| Auth API | `/auth-api` | JWT auth flows |
+| Petstore | `/api-store/petstore` | Unmodified classic example |
+| Blog API | `/api-store/blog` | **Versioned** — v1 and v2 with selector |
+| Auth API | `/api-store/auth` | JWT auth flows |
 
 ### Custom React pages (no sidebar, full-width)
 

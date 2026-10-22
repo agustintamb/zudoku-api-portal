@@ -1,0 +1,38 @@
+---
+title: Slots
+description: Puntos de inyección nombrados en el layout de Zudoku
+---
+
+# Slots
+
+Un slot es un punto de inyección nombrado en el layout de Zudoku. Solo existen en las
+páginas que usan el layout de Zudoku (documentación y API reference), no en las custom pages
+con `layout: "none"`.
+
+Hay dos formas de registrarlos:
+
+- `config.slots` — global, activo en todas las páginas con layout de Zudoku.
+- `<Slot.Source name="...">` — dentro de un componente, activo solo mientras está montado.
+
+En este proyecto los slots de demo están ocultos por defecto. El botón **🔌 Slots: ON/OFF**
+del header los activa (el estado se guarda en `localStorage`, ver `src/slots/slotVisibility.ts`).
+
+| Slot | Dónde aparece | Usos típicos |
+|------|---------------|--------------|
+| `layout-before-head` | Encima del `<header>` | Banners de anuncio, avisos de mantenimiento |
+| `layout-after-head` | Entre el header y el grid de la página | Banners secundarios, alertas |
+| `head-navigation-start` | En el header, después del logo | Badge de entorno, selector de organización |
+| `head-navigation-end` | En el header, antes del theme switcher | CTA, notificaciones |
+| `top-navigation-before` | Encima de la fila de tabs | Breadcrumbs, alertas contextuales |
+| `top-navigation-after` | Debajo de la fila de tabs | Sub-navegación, toolbar contextual |
+| `navigation-before` | Arriba del sidebar izquierdo | Buscador, badge de versión |
+| `navigation-after` | Abajo del sidebar izquierdo | Soporte, feedback |
+| `content-before` | Dentro de `<main>`, antes del contenido | Alertas, breadcrumbs |
+| `content-after` | Dentro de `<main>`, después del contenido | Links siguiente/anterior, feedback |
+| `footer-before` | Dentro del footer, antes de las columnas | En este proyecto aloja el `<AppFooter>` propio |
+| `footer-after` | Dentro del footer, después de las columnas | Links legales, cookies |
+
+<CalloutBox variant="warning" title="Requisitos">
+Los sidebar slots solo se ven en páginas con sidebar (docs y API reference).
+Los slots del footer solo se montan si `site.footer` está configurado.
+</CalloutBox>

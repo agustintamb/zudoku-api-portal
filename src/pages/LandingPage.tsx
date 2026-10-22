@@ -1,16 +1,20 @@
 import { LandingPage as ZudokuLandingPage } from "zudoku/components";
+import { ClientsCarousel } from "../components/ClientsCarousel";
 
 export function LandingPage() {
   return (
-    <ZudokuLandingPage
-      variant="hero"
-      eyebrow="API Platform v2.0"
-      title="Build faster with our APIs"
-      description="Explore interactive API documentation, test endpoints in real-time, and integrate in minutes. Three APIs available — Petstore, Blog, and Auth."
-      actions={[
-        { label: "Browse APIs", href: "/api-store", variant: "link" },
-        { label: "Read the Docs", href: "/introduction", variant: "ghost" },
-      ]}
-    />
+    <>
+      <ZudokuLandingPage
+        variant="hero"
+        eyebrow="API Platform v2.0"
+        title="Build faster with our APIs"
+        description="Explore interactive API documentation, test endpoints in real-time, and integrate in minutes. Three APIs available — Petstore, Blog, and Auth."
+        actions={[
+          { label: "Browse APIs", href: "/api-store", variant: "link" },
+          { label: "Read the Docs", href: "/introduction", variant: "ghost" },
+        ]}
+      />
+      <ClientsCarousel />
+    </>
   );
 }

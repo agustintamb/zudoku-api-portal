@@ -2,7 +2,7 @@ import type { ZudokuConfig } from "zudoku";
 import { LandingPage } from "./src/pages/LandingPage";
 import { ApiStorePage } from "./src/pages/ApiStorePage";
 import { DashboardPage } from "./src/pages/DashboardPage";
-import { SlotsDemoPage } from "./src/pages/SlotsDemoPage";
+import { AppShell } from "./src/components/AppHeader";
 import { CalloutBox } from "./src/components/CalloutBox";
 import { FeatureGrid } from "./src/components/FeatureGrid";
 import { LayoutBeforeHead } from "./src/slots/LayoutBeforeHead";
@@ -12,51 +12,22 @@ import { TopNavigationBefore } from "./src/slots/TopNavigationBefore";
 import { TopNavigationAfter } from "./src/slots/TopNavigationAfter";
 import { NavigationBefore } from "./src/slots/NavigationBefore";
 import { NavigationAfter } from "./src/slots/NavigationAfter";
-import { FooterBefore } from "./src/slots/FooterBefore";
-import { FooterAfter } from "./src/slots/FooterAfter";
+import { AppFooter } from "./src/components/AppFooter";
+import "./src/styles/footer.css";
 
 const config: ZudokuConfig = {
   // ─── Branding ─────────────────────────────────────────────────────────────
   site: {
+    showPoweredBy: false,
     logo: {
       src: { light: "/logo-light.svg", dark: "/logo-dark.svg" },
       alt: "Zudoku",
       width: "130px",
       href: "/home",
     },
-    // Footer only renders when site.footer is configured — otherwise the
-    // <Footer> component returns null, and footer-before/footer-after slots
-    // are never mounted regardless of what's in config.slots.
-    footer: {
-      copyright: "© 2026 Zudoku Test Project",
-      columns: [
-        {
-          title: "Pages",
-          links: [
-            { label: "Home", href: "/home" },
-            { label: "API Store", href: "/api-store" },
-            { label: "Dashboard", href: "/dashboard" },
-          ],
-        },
-        {
-          title: "Documentation",
-          links: [
-            { label: "Introduction", href: "/introduction" },
-            { label: "Components Demo", href: "/components-demo" },
-            { label: "Slots Demo", href: "/slots-demo" },
-            { label: "Customization", href: "/customization" },
-          ],
-        },
-        {
-          title: "APIs",
-          links: [
-            { label: "Petstore", href: "/api" },
-            { label: "Blog API", href: "/blog-api" },
-            { label: "Auth API", href: "/auth-api" },
-          ],
-        },
-      ],
-    },
+    // Zudoku only mounts footer slots when site.footer exists. The footer itself is
+    // <AppFooter>, injected through the footer-before slot (see src/styles/footer.css).
+    footer: {},
   },
 
   // ─── Theme ────────────────────────────────────────────────────────────────
@@ -95,30 +66,20 @@ const config: ZudokuConfig = {
     {
       type: "custom-page",
       path: "/home",
+      display: "hide",
       label: "Home",
       icon: "home",
-      element: <LandingPage />,
-    },
-    {
-      type: "custom-page",
-      path: "/api-store",
-      label: "API Store",
-      icon: "layers",
-      element: <ApiStorePage />,
+      layout: "none",
+      element: <AppShell><LandingPage /></AppShell>,
     },
     {
       type: "custom-page",
       path: "/dashboard",
+      display: "hide",
       label: "Dashboard",
       icon: "bar-chart-2",
-      element: <DashboardPage />,
-    },
-    {
-      type: "custom-page",
-      path: "/slots-demo",
-      label: "Slots Demo",
-      icon: "plug",
-      element: <SlotsDemoPage />,
+      layout: "none",
+      element: <AppShell><DashboardPage /></AppShell>,
     },
 
     // ── Documentation — MDX pages with left sidebar ──
@@ -142,7 +103,7 @@ const config: ZudokuConfig = {
           type: "category",
           label: "Reference",
           icon: "book-open",
-          items: ["/customization"],
+          items: ["/customization", "/slots"],
         },
         {
           type: "category",
@@ -160,41 +121,21 @@ const config: ZudokuConfig = {
         },
       ],
     },
+
+    // ── API Store — its tab stays active on /api-store/* (the API docs live under it) ──
+    {
+      type: "custom-page",
+      path: "/api-store",
+      label: "API Store",
+      icon: "layers",
+      element: <ApiStorePage />,
+    },
   ],
 
   // ─── Header ───────────────────────────────────────────────────────────────
-  // header.navigation adds links/dropdowns to the top header bar.
-  // header.placements controls where search, auth, and nav are positioned.
-  // Slots inject React content into named positions inside the existing header.
+  // The header tabs come from the top-level `navigation` items above.
   header: {
-    navigation: [
-      {
-        label: "Dashboard",
-        to: "/dashboard",
-      },
-      {
-        label: "Resources",
-        items: [
-          {
-            label: "Introduction",
-            description: "Get started with the platform",
-            to: "/introduction",
-          },
-          {
-            label: "Components Demo",
-            description: "Custom MDX components showcase",
-            to: "/components-demo",
-          },
-          {
-            label: "Zudoku Docs",
-            to: "https://zudoku.dev/docs/quickstart",
-            target: "_blank",
-          },
-        ],
-      },
-    ],
     placements: {
-      navigation: "end",
       search: "center",
     },
   },
@@ -217,8 +158,7 @@ const config: ZudokuConfig = {
     "top-navigation-after":  <TopNavigationAfter />,
     "navigation-before":     <NavigationBefore />,
     "navigation-after":      <NavigationAfter />,
-    "footer-before":         <FooterBefore />,
-    "footer-after":          <FooterAfter />,
+    "footer-before":        <AppFooter slim />,
   },
 
   // ─── Redirects ────────────────────────────────────────────────────────────
@@ -230,15 +170,15 @@ const config: ZudokuConfig = {
     {
       type: "file",
       input: "./apis/openapi.yaml",
-      path: "/api",
+      path: "/api-store/petstore",
     },
     // Blog API with versioning — input is an array of { path, input, label }.
     // Zudoku automatically shows a version selector dropdown in the API header
-    // and creates routes /blog-api/v1/... and /blog-api/v2/...
-    // /blog-api redirects to the first version (v1).
+    // and creates routes /api-store/blog/v1/... and /api-store/blog/v2/...
+    // /api-store/blog redirects to the first version (v1).
     {
       type: "file",
-      path: "/blog-api",
+      path: "/api-store/blog",
       input: [
         { path: "v1", input: "./apis/blog-api.yaml", label: "v1.0" },
         { path: "v2", input: "./apis/blog-api-v2.yaml", label: "v2.0" },
@@ -248,7 +188,7 @@ const config: ZudokuConfig = {
     {
       type: "file",
       input: "./apis/auth-api.yaml",
-      path: "/auth-api",
+      path: "/api-store/auth",
     },
   ],
 

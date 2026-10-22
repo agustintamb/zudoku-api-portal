@@ -1,0 +1,15 @@
+/* Zudoku only mounts its slots inside its own <Footer>, which needs `site.footer`.
+   We use that wrapper just to host <AppFooter> (footer-before slot), so we strip
+   the wrapper's own border and padding. */
+footer:has([data-app-footer]) {
+  border-top: 0;
+}
+
+footer:has([data-app-footer]) > div {
+  max-width: none;
+  padding: 0;
+}
+
+footer:has([data-app-footer]) > div > div {
+  display: block;
+}

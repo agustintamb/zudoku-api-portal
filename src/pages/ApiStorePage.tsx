@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "zudoku/router";
 
 // zudoku/ui/* exports shadcn components — these are the same shadcn components
@@ -32,7 +33,7 @@ const APIs: ApiEntry[] = [
     description:
       "The classic Swagger Petstore example. CRUD operations for pets, store inventory, and user management.",
     version: "3.0.2",
-    path: "/api",
+    path: "/api-store/petstore",
     status: "stable",
     category: "Example",
     endpoints: 20,
@@ -44,7 +45,7 @@ const APIs: ApiEntry[] = [
     description:
       "Manage blog posts, comments, and author profiles. Supports pagination, filtering by tag or author. Versioned — v1 and v2 available.",
     version: "v1 / v2",
-    path: "/blog-api",
+    path: "/api-store/blog",
     status: "stable",
     category: "Content",
     endpoints: 11,
@@ -56,7 +57,7 @@ const APIs: ApiEntry[] = [
     description:
       "JWT authentication service. Register, login, token refresh, password reset, and profile management.",
     version: "2.0.0",
-    path: "/auth-api",
+    path: "/api-store/auth",
     status: "stable",
     category: "Security",
     endpoints: 8,
@@ -71,28 +72,26 @@ const statusVariant: Record<ApiEntry["status"], "default" | "secondary" | "warni
 };
 
 export function ApiStorePage() {
+  const [query, setQuery] = useState("");
+  const [apiFilter, setApiFilter] = useState("all");
+
+  const q = query.trim().toLowerCase();
+  const filtered = APIs.filter(
+    (a) =>
+      (apiFilter === "all" || a.id === apiFilter) &&
+      (!q ||
+        a.name.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q) ||
+        a.tags.some((t) => t.toLowerCase().includes(q))),
+  );
+
   return (
     <div
-      style={{
-        maxWidth: "1100px",
-        margin: "0 auto",
-        padding: "2.5rem 1.5rem",
-      }}
+      style={{ padding: "1.5rem 0" }}
     >
       {/* Header */}
       <div style={{ marginBottom: "2.5rem" }}>
-        <p
-          style={{
-            fontSize: "0.8rem",
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "hsl(var(--primary))",
-            marginBottom: "0.5rem",
-          }}
-        >
-          API Catalog
-        </p>
+
         <h1
           style={{
             fontSize: "2rem",
@@ -108,40 +107,54 @@ export function ApiStorePage() {
         </p>
       </div>
 
-      {/* Stats bar */}
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          padding: "1rem 1.25rem",
-          borderRadius: "0.5rem",
-          background: "hsl(var(--muted))",
-          marginBottom: "2rem",
-          flexWrap: "wrap",
-        }}
-      >
-        {[
-          { label: "Total APIs", value: APIs.length },
-          { label: "Total Endpoints", value: APIs.reduce((s, a) => s + a.endpoints, 0) },
-          { label: "Stable", value: APIs.filter((a) => a.status === "stable").length },
-          { label: "Categories", value: new Set(APIs.map((a) => a.category)).size },
-        ].map(({ label, value }) => (
-          <div key={label}>
-            <div
+      {/* Search + filter by API */}
+      <div style={{ marginBottom: "2rem" }}>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search APIs by name, description or tag…"
+          aria-label="Search APIs"
+          style={{
+            width: "100%",
+            maxWidth: "480px",
+            padding: "0.5rem 0.75rem",
+            borderRadius: "0.5rem",
+            border: "1px solid hsl(var(--border))",
+            background: "hsl(var(--background))",
+            color: "hsl(var(--foreground))",
+            fontSize: "0.875rem",
+            marginBottom: "1rem",
+          }}
+        />
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {[{ id: "all", name: "All" }, ...APIs].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setApiFilter(f.id)}
               style={{
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                color: "hsl(var(--foreground))",
+                padding: "0.25rem 0.75rem",
+                borderRadius: "9999px",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                cursor: "pointer",
+                border: "1px solid",
+                borderColor: apiFilter === f.id ? "hsl(var(--primary))" : "hsl(var(--border))",
+                background: apiFilter === f.id ? "hsl(var(--primary))" : "transparent",
+                color: apiFilter === f.id ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))",
               }}
             >
-              {value}
-            </div>
-            <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-              {label}
-            </div>
-          </div>
-        ))}
+              {f.name}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {filtered.length === 0 && (
+        <p style={{ color: "hsl(var(--muted-foreground))", fontSize: "0.875rem" }}>
+          No APIs match your search.
+        </p>
+      )}
 
       {/* API Grid — uses zudoku/ui Card and Badge (shadcn) */}
       <div
@@ -151,7 +164,7 @@ export function ApiStorePage() {
           gap: "1.5rem",
         }}
       >
-        {APIs.map((api) => (
+        {filtered.map((api) => (
           <Card key={api.id}>
             <CardHeader>
               <div
