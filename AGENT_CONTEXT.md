@@ -12,7 +12,9 @@ understand the full capability surface of Zudoku v0.93 by building working examp
 every major customization axis: routing, custom pages, theming, API versioning, MDX
 components, header/layout customization, and slots.
 
-**Constraint held throughout**: existing files were never deleted, only added to.
+The project is now a **hybrid app**: Home and Dashboard are custom pages with their own
+header/footer (`layout: "none"`); Documentation, API Store and API docs use Zudoku's layout.
+Dev server: `npm run dev` (http://localhost:3000).
 
 ---
 
@@ -62,31 +64,39 @@ const navItem = traverseNavigation(navigation, (item, parentCategories) => {
 parent category), `hasNavigation` is false → no left sidebar → `<main>` gets
 `col-span-full` → full-width layout. Header and footer still render.
 
-API doc pages (`/api`, `/blog-api`, etc.) are NOT in the navigation array, but they get
-sidebar content from the OpenAPI plugin via `getPluginNavigation`.
+API doc pages are NOT in the navigation array, but they get sidebar content from the
+OpenAPI plugin via `getPluginNavigation`.
 
 ### Current navigation structure
 
 ```
 navigation: [
-  { type: "custom-page", path: "/home", ... }           // no sidebar
-  { type: "custom-page", path: "/api-store", ... }      // no sidebar
-  { type: "custom-page", path: "/dashboard", ... }      // no sidebar
-  { type: "custom-page", path: "/slots-demo", ... }     // no sidebar
-  {
-    type: "category", label: "Documentation",            // sidebar shows when in /introduction etc.
-    items: [
-      { type: "category", label: "Getting Started", items: ["/introduction"] },
-      { type: "category", label: "MDX Examples", items: ["/components-demo", "/api-store-mdx"] },
-      { type: "category", label: "Reference", items: ["/customization"] },
-      { type: "category", label: "Useful Links", ... },
-    ]
-  }
+  { type: "custom-page", path: "/home", display: "hide", layout: "none", element: <AppShell>… }
+  { type: "custom-page", path: "/dashboard", display: "hide", layout: "none", element: <AppShell>… }
+  { type: "category", label: "Documentation", items: [Getting Started, MDX Examples,
+      Reference (/customization, /slots), Useful Links] }
+  { type: "custom-page", path: "/api-store", label: "API Store" }   // Zudoku layout, no AppShell
 ]
 ```
 
-APIs are registered in `apis: [...]` only — not in `navigation`. Accessible via the
-API Store page buttons.
+- `display: "hide"` only hides the top-nav tab; the route is still registered.
+- Top-nav order shown by Zudoku: Documentation, API Store. The custom `AppHeader` (Home and
+  Dashboard only) shows Home, Dashboard, Docs, API Store.
+- APIs live under `/api-store/*` so the "API Store" tab is highlighted (NavLink prefix match)
+  on the store page and on every API docs/playground page:
+  `/api-store/petstore`, `/api-store/blog` (v1/v2), `/api-store/auth`.
+- `/` redirects to `/home`.
+
+### Header, footer and site
+
+- `header` is only `placements: { search: "center" }`; there is no `header.navigation` (the
+  "Resources" dropdown was removed).
+- `site: { showPoweredBy: false, logo, footer: {} }`.
+- `src/components/AppFooter.tsx` has two variants, both fed by `footerData.ts`:
+  full (inside `AppShell`, Home/Dashboard) and `slim` (thin single row, injected through the
+  `footer-before` slot on Zudoku-layout pages). `src/styles/footer.css` (imported in the config)
+  strips Zudoku's footer wrapper border/padding via `footer:has([data-app-footer])`.
+- `Footer`, `Header` and `Layout` are not exported from `zudoku`, hence the custom footer.
 
 ---
 
@@ -121,7 +131,7 @@ Native. Change `input` from a string to an array:
 ```tsx
 {
   type: "file",
-  path: "/blog-api",
+  path: "/api-store/blog",
   input: [
     { path: "v1", input: "./apis/blog-api.yaml", label: "v1.0" },
     { path: "v2", input: "./apis/blog-api-v2.yaml", label: "v2.0" },
@@ -129,7 +139,7 @@ Native. Change `input` from a string to an array:
 }
 ```
 Zudoku auto-generates:
-- Routes `/blog-api/v1/...` and `/blog-api/v2/...`
+- Routes `/api-store/blog/v1/...` and `/api-store/blog/v2/...`
 - A `<Select>` dropdown in the API header (from `ApiHeader.tsx`)
 - Version switching preserves the current tag if it exists in the target version
 
@@ -176,7 +186,7 @@ mdx: { components: { CalloutBox, FeatureGrid } }
 ### Header customization
 
 Three mechanisms:
-1. **`header.navigation`**: links/dropdowns in the top header bar
+1. **`header.navigation`**: links/dropdowns in the top header bar (not used currently)
 2. **`header.placements`**: repositions search, auth, nav (`start | center | end`)
 3. **`slots`**: injects React components into named layout positions
 
@@ -229,14 +239,13 @@ return <SlotBar name="..." ... />;
 The toggle button (`SlotToggle.tsx`) lives in `head-navigation-end` and is always visible.
 It shows `"🔌 Slots: ON/OFF"` and renders the slot indicator for that position only when ON.
 
-`SlotsDemoPage` uses `<Slot.Source>` for `content-before`/`content-after` — these are also
-gated by the store so they only appear when slots are ON.
+The slots are documented as an MDX page (`pages/slots.mdx`); there is no slots custom page.
 
 ### Footer requires site.footer
 
 `<Footer>` returns `null` when `site.footer` is not configured — the `footer-before` and
-`footer-after` slots are never mounted. The project has `site.footer` configured with
-`copyright` + 3 `columns`. See `zudoku.config.tsx`.
+`footer-after` slots are never mounted. The project sets `site.footer: {}` and uses
+`footer-before` for `<AppFooter slim />` (see "Header, footer and site").
 
 ### Things that are NOT possible
 
@@ -250,74 +259,54 @@ gated by the store so they only appear when slots are ON.
 
 ---
 
-## The "full custom layout" architecture
-
-The user was thinking about this at the end of the session:
-
-> If I want a more customized app and don't want to be tied to that header, would it be
-> better to use `layout: "none"` and build everything custom, navigating with React Router
-> to the routes specified in the Zudoku config?
-
-**Answer: Yes. This is a valid hybrid architecture:**
+## The hybrid layout architecture
 
 ```
-Custom pages (layout: "none"):
-  /home            → fully custom React component, own header/nav
-  /api-store       → fully custom
-  /dashboard       → fully custom
+Custom pages (layout: "none", wrapped in <AppShell>: AppHeader + AppFooter):
+  /home            → LandingPage (hero + ClientsCarousel)
+  /dashboard       → DashboardPage
 
-Zudoku-managed pages (layout: "default" or omitted):
-  /api             → Zudoku OpenAPI layout with sidebar
-  /blog-api/v1     → same
-  /auth-api        → same
-  /introduction    → MDX page with sidebar
+Zudoku-layout pages (header/sidebar by Zudoku, slim footer via slot):
+  /api-store       → custom page (search + filter chips), label "API Store"
+  /api-store/*     → OpenAPI docs/playground (petstore, blog v1/v2, auth)
+  /introduction, /components-demo, /api-store-mdx, /customization, /slots → MDX docs
 ```
 
-In custom pages, build your own `<header>` as a normal React component.
-Use `<Link to="/api-store">` from `zudoku/router` for internal navigation.
-Zudoku registers all the routes; you just navigate to them.
-
-This was partially explored — `/home` has `layout: "none"` at session end, but a custom
-header/nav has not been built yet.
+In custom pages, use `<Link to="...">` from `zudoku/router` for internal navigation.
+`ClientsCarousel` is a pure CSS keyframes marquee (a `<style>` tag in the component). Libraries
+were tried and dropped: `react-fast-marquee` is CJS-only and breaks Zudoku's SSR dev render
+("Element type is invalid… got: object"); Embla autoscroll did not animate. Logos come from
+`https://cdn.simpleicons.org/<slug>`.
 
 ---
 
 ## Files created / modified
 
 ### Modified
-- `zudoku.config.tsx` — full config: theme, custom pages, versioned APIs, header, slots, footer, MDX components
+- `zudoku.config.tsx` — theme, navigation, versioned APIs under `/api-store/*`, header placements, slots, site/footer, MDX components, redirect `/` → `/home`
 
-### Created — pages
-- `src/pages/LandingPage.tsx` — uses `<LandingPage>` from `zudoku/components` (`/home`)
-- `src/pages/ApiStorePage.tsx` — uses `zudoku/ui` Card/Badge/Button (`/api-store`)
-- `src/pages/DashboardPage.tsx` — useState + useNavigate demo (`/dashboard`)
-- `src/pages/SlotsDemoPage.tsx` — all slots documented with table + uses `Slot.Source` (`/slots-demo`)
-- `pages/components-demo.mdx` — MDX demo of CalloutBox and FeatureGrid
-- `pages/api-store-mdx.mdx` — API catalog in MDX (compare vs React custom page)
-- `pages/customization.mdx` — reference of everything hideable/customizable in Zudoku
+### Pages
+- `src/pages/LandingPage.tsx` — `<LandingPage>` from `zudoku/components` plus `<ClientsCarousel />`
+- `src/pages/ApiStorePage.tsx` — `zudoku/ui` Card/Badge/Button, search + filter chips
+- `src/pages/DashboardPage.tsx` — useState + useNavigate demo
+- `pages/components-demo.mdx`, `pages/api-store-mdx.mdx`, `pages/customization.mdx`, `pages/slots.mdx` (all 12 slots table)
 
-### Created — APIs
-- `apis/blog-api.yaml` — Blog API v1
-- `apis/blog-api-v2.yaml` — Blog API v2 (slug, coverImage, likes, featured, nested comments, socialLinks)
-- `apis/auth-api.yaml` — Auth API (register, login, refresh, password reset)
+### APIs
+- `apis/blog-api.yaml` (v1), `apis/blog-api-v2.yaml`, `apis/auth-api.yaml`
 
-### Created — custom MDX components
-- `src/components/CalloutBox.tsx` — 5 variants (info/warning/success/error/tip)
-- `src/components/FeatureGrid.tsx` — responsive grid of feature cards
+### Components and styles
+- `src/components/AppHeader.tsx` — `AppHeader` (Home, Dashboard, Docs, API Store) and `AppShell`
+- `src/components/AppFooter.tsx` + `footerData.ts` — full and `slim` footer, single data source
+- `src/components/ClientsCarousel.tsx` — CSS marquee of brand logos
+- `src/components/CalloutBox.tsx`, `FeatureGrid.tsx` — custom MDX components
+- `src/styles/footer.css` — neutralizes Zudoku's footer wrapper
 
-### Created — slot system
+### Slot system
 - `src/slots/slotVisibility.ts` — module-level store, localStorage persistence
-- `src/slots/SlotToggle.tsx` — toggle button, lives in head-navigation-end (always visible)
-- `src/slots/SlotTag.tsx` — shared `<SlotTag>` pill and `<SlotBar>` full-width components
-- `src/slots/LayoutBeforeHead.tsx` — red bar, above header
-- `src/slots/HeadNavigationStart.tsx` — orange pill, inside header after logo
-- `src/slots/HeadNavigationEnd.tsx` — (replaced by SlotToggle)
-- `src/slots/TopNavigationBefore.tsx` — green-lime bar, above top nav tabs
-- `src/slots/TopNavigationAfter.tsx` — green bar, below top nav tabs
-- `src/slots/NavigationBefore.tsx` — cyan pill, top of left sidebar
-- `src/slots/NavigationAfter.tsx` — violet pill, bottom of left sidebar
-- `src/slots/FooterBefore.tsx` — teal bar, inside footer before columns
-- `src/slots/FooterAfter.tsx` — indigo bar, inside footer after columns
+- `src/slots/SlotToggle.tsx` — toggle button in `head-navigation-end`
+- `src/slots/SlotTag.tsx` — shared `<SlotTag>` and `<SlotBar>`
+- `LayoutBeforeHead`, `HeadNavigationStart`, `TopNavigationBefore`, `TopNavigationAfter`, `NavigationBefore`, `NavigationAfter` — one demo bar/pill each
+- Removed: `HeadNavigationEnd`, `FooterBefore`, `FooterAfter`, `SlotsDemoPage`, `HeaderSlotDemo`
 
 ---
 
@@ -325,31 +314,30 @@ header/nav has not been built yet.
 
 ### High priority (user showed interest)
 
-1. **Full custom layout architecture** — build a proper custom `<AppHeader>` with React
-   nav, apply `layout: "none"` to all custom pages, verify API doc pages still work with
-   their Zudoku layout. This is the next natural step.
-
-2. **Authentication** — Zudoku has native auth plugins for Clerk, Firebase, Supabase,
+1. **Authentication** — Zudoku has native auth plugins for Clerk, Firebase, Supabase,
    Azure B2C, and OpenID. The `authentication` config key wires auth into the layout
    (Login button, profile dropdown). Could demo Clerk or a mock auth provider.
 
-3. **Protected routes** — `protectedRoutes` config key exists in the schema. Works with
+2. **Protected routes** — `protectedRoutes` config key exists in the schema. Works with
    auth plugins to gate pages.
+
+3. **Visual confirmation** — most UI changes were only verified by HTTP status, not in a browser.
+
+
 
 ### Medium priority
 
 4. **`header.navigation` with icons** — the schema accepts `icon` on nav items but it
    wasn't tested with actual Lucide icon names.
 
-5. **`Slot.Source` inside a custom page** — ✅ DONE in `SlotsDemoPage`. Confirmed working.
-   `content-before` and `content-after` are injected via `<Slot.Source>` and only active
-   while `SlotsDemoPage` is mounted. Also gated by `slotStore` so they respect the toggle.
+5. **`Slot.Source` inside a custom page** — worked earlier in the removed `SlotsDemoPage`
+   (`content-before`/`content-after`, gated by `slotStore`). No longer present in the project.
 
 6. **Search** — Zudoku has built-in search via `pagefind`. Works on built output, not dev.
    Haven't tested it.
 
-7. **API catalog plugin** (`zudoku/plugins/api-catalog`) — a Zudoku-native plugin for
-   API catalog pages. Might replace the custom `ApiStorePage.tsx` with a config-driven version.
+7. **Native `catalogs` option / API catalog plugin** — tried `catalogs` (route `/api-reference`);
+   it is applied only at dev-server startup (restart needed). Dropped in favor of the custom `ApiStorePage`.
 
 8. **`options.showVersionSelect: "always"`** on an API with a single version — this would
    show the version selector even when there's only one version.

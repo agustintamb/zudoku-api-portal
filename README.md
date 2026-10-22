@@ -35,7 +35,7 @@ A hands-on exploration project built on top of **Zudoku v0.93** to map the bound
 - **UI components**: `zudoku/ui/*` exports shadcn components (PascalCase: `Badge`, `Card`, `Button`). They inherit the active theme.
 - **Router**: `zudoku/router` re-exports React Router — `Link`, `useNavigate`, `useParams` all work in custom pages.
 - **Custom MDX components**: Registered once in `mdx.components` in the config; available as JSX tags in every `.mdx` file without imports.
-- **Header slots**: Named injection points (`head-navigation-end`, `layout-before-head`, etc.) accept arbitrary React components.
+- **Header slots**: Named injection points (`layout-before-head`, `top-navigation-before`, etc.) accept arbitrary React components.
 - **i18n**: Not supported — all framework strings are hardcoded in English.
 - **Full custom layout**: Use `layout: "none"` on custom pages + build your own header/nav with React. API doc pages keep Zudoku's full layout.
 
@@ -74,5 +74,10 @@ src/
   components/
     CalloutBox.tsx      # Custom MDX component (5 variants)
     FeatureGrid.tsx     # Custom MDX component (responsive grid)
-    HeaderSlotDemo.tsx  # Injected into header via slots config
+    AppHeader.tsx       # Custom header + AppShell (Home/Dashboard)
+    AppFooter.tsx       # Footer (full and slim variants), data in footerData.ts
+    ClientsCarousel.tsx # CSS marquee of client logos on the landing
+  slots/                # Slot demos (visibility toggled via SlotToggle)
+  styles/
+    footer.css          # Neutralizes Zudoku's footer wrapper
 ```
