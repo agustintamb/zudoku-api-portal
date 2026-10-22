@@ -69,14 +69,16 @@ sidebar content from the OpenAPI plugin via `getPluginNavigation`.
 
 ```
 navigation: [
-  { type: "custom-page", path: "/home", ... }        // no sidebar
-  { type: "custom-page", path: "/api-store", ... }   // no sidebar
-  { type: "custom-page", path: "/dashboard", ... }   // no sidebar
+  { type: "custom-page", path: "/home", ... }           // no sidebar
+  { type: "custom-page", path: "/api-store", ... }      // no sidebar
+  { type: "custom-page", path: "/dashboard", ... }      // no sidebar
+  { type: "custom-page", path: "/slots-demo", ... }     // no sidebar
   {
-    type: "category", label: "Documentation",         // sidebar shows when in /introduction etc.
+    type: "category", label: "Documentation",            // sidebar shows when in /introduction etc.
     items: [
       { type: "category", label: "Getting Started", items: ["/introduction"] },
       { type: "category", label: "MDX Examples", items: ["/components-demo", "/api-store-mdx"] },
+      { type: "category", label: "Reference", items: ["/customization"] },
       { type: "category", label: "Useful Links", ... },
     ]
   }
@@ -202,6 +204,40 @@ slots: {
 }
 ```
 
+### Slot visibility toggle (playground feature)
+
+All slot demo components are controlled by a module-level store in `src/slots/slotVisibility.ts`.
+State persists in `localStorage` (key: `zudoku-slots-visible`). Default: **false** (slots hidden).
+
+```ts
+// src/slots/slotVisibility.ts — useSyncExternalStore pattern, no Provider needed
+export const slotStore = {
+  subscribe(cb) { ... },
+  getSnapshot() { return visible; },
+  getServerSnapshot() { return false; },
+  toggle() { visible = !visible; localStorage.setItem(...); notify(); },
+};
+```
+
+Every slot component reads from the store:
+```tsx
+const visible = useSyncExternalStore(slotStore.subscribe, slotStore.getSnapshot, slotStore.getServerSnapshot);
+if (!visible) return null;
+return <SlotBar name="..." ... />;
+```
+
+The toggle button (`SlotToggle.tsx`) lives in `head-navigation-end` and is always visible.
+It shows `"🔌 Slots: ON/OFF"` and renders the slot indicator for that position only when ON.
+
+`SlotsDemoPage` uses `<Slot.Source>` for `content-before`/`content-after` — these are also
+gated by the store so they only appear when slots are ON.
+
+### Footer requires site.footer
+
+`<Footer>` returns `null` when `site.footer` is not configured — the `footer-before` and
+`footer-after` slots are never mounted. The project has `site.footer` configured with
+`copyright` + 3 `columns`. See `zudoku.config.tsx`.
+
 ### Things that are NOT possible
 
 - **i18n / string replacement**: All framework strings ("On this page", "Send", "Query
@@ -249,20 +285,39 @@ header/nav has not been built yet.
 ## Files created / modified
 
 ### Modified
-- `zudoku.config.tsx` — full rewrite adding theme, custom pages, versioned APIs, header config, slots, MDX components
+- `zudoku.config.tsx` — full config: theme, custom pages, versioned APIs, header, slots, footer, MDX components
 
-### Created
-- `apis/blog-api.yaml` — Blog API v1 (posts, comments, authors)
-- `apis/blog-api-v2.yaml` — Blog API v2 (adds slug, coverImage, likes, featured endpoint, nested comments, socialLinks)
-- `apis/auth-api.yaml` — Auth API (register, login, refresh, password reset)
+### Created — pages
+- `src/pages/LandingPage.tsx` — uses `<LandingPage>` from `zudoku/components` (`/home`)
+- `src/pages/ApiStorePage.tsx` — uses `zudoku/ui` Card/Badge/Button (`/api-store`)
+- `src/pages/DashboardPage.tsx` — useState + useNavigate demo (`/dashboard`)
+- `src/pages/SlotsDemoPage.tsx` — all slots documented with table + uses `Slot.Source` (`/slots-demo`)
 - `pages/components-demo.mdx` — MDX demo of CalloutBox and FeatureGrid
-- `pages/api-store-mdx.mdx` — API catalog in MDX
-- `src/pages/LandingPage.tsx` — uses `<LandingPage>` from `zudoku/components`
-- `src/pages/ApiStorePage.tsx` — uses `zudoku/ui` Card/Badge/Button
-- `src/pages/DashboardPage.tsx` — useState + useNavigate demo
-- `src/components/CalloutBox.tsx` — custom MDX component, 5 variants
-- `src/components/FeatureGrid.tsx` — custom MDX component, responsive grid
-- `src/components/HeaderSlotDemo.tsx` — badge + button injected via slot
+- `pages/api-store-mdx.mdx` — API catalog in MDX (compare vs React custom page)
+- `pages/customization.mdx` — reference of everything hideable/customizable in Zudoku
+
+### Created — APIs
+- `apis/blog-api.yaml` — Blog API v1
+- `apis/blog-api-v2.yaml` — Blog API v2 (slug, coverImage, likes, featured, nested comments, socialLinks)
+- `apis/auth-api.yaml` — Auth API (register, login, refresh, password reset)
+
+### Created — custom MDX components
+- `src/components/CalloutBox.tsx` — 5 variants (info/warning/success/error/tip)
+- `src/components/FeatureGrid.tsx` — responsive grid of feature cards
+
+### Created — slot system
+- `src/slots/slotVisibility.ts` — module-level store, localStorage persistence
+- `src/slots/SlotToggle.tsx` — toggle button, lives in head-navigation-end (always visible)
+- `src/slots/SlotTag.tsx` — shared `<SlotTag>` pill and `<SlotBar>` full-width components
+- `src/slots/LayoutBeforeHead.tsx` — red bar, above header
+- `src/slots/HeadNavigationStart.tsx` — orange pill, inside header after logo
+- `src/slots/HeadNavigationEnd.tsx` — (replaced by SlotToggle)
+- `src/slots/TopNavigationBefore.tsx` — green-lime bar, above top nav tabs
+- `src/slots/TopNavigationAfter.tsx` — green bar, below top nav tabs
+- `src/slots/NavigationBefore.tsx` — cyan pill, top of left sidebar
+- `src/slots/NavigationAfter.tsx` — violet pill, bottom of left sidebar
+- `src/slots/FooterBefore.tsx` — teal bar, inside footer before columns
+- `src/slots/FooterAfter.tsx` — indigo bar, inside footer after columns
 
 ---
 
@@ -286,9 +341,9 @@ header/nav has not been built yet.
 4. **`header.navigation` with icons** — the schema accepts `icon` on nav items but it
    wasn't tested with actual Lucide icon names.
 
-5. **`Slot.Source` inside a custom page** — slots can also be used from inside components,
-   not just from config. A component can render `<Slot.Source name="footer-before">` to
-   inject content into the layout from deep in the tree.
+5. **`Slot.Source` inside a custom page** — ✅ DONE in `SlotsDemoPage`. Confirmed working.
+   `content-before` and `content-after` are injected via `<Slot.Source>` and only active
+   while `SlotsDemoPage` is mounted. Also gated by `slotStore` so they respect the toggle.
 
 6. **Search** — Zudoku has built-in search via `pagefind`. Works on built output, not dev.
    Haven't tested it.
