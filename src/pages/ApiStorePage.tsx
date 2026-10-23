@@ -207,7 +207,7 @@ export function ApiStorePage() {
                 }}
               >
                 <span>
-                  <strong style={{ color: "hsl(var(--foreground))" }}>v{api.version}</strong>{" "}
+                  <strong style={{ color: "hsl(var(--foreground))" }}>{api.version.startsWith("v") ? api.version : `v${api.version}`}</strong>{" "}
                   Version
                 </span>
                 <span>

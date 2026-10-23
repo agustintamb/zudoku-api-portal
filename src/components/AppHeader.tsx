@@ -33,13 +33,14 @@ export function AppHeader() {
       >
         Zudoku Sandbox
       </Link>
-      <nav style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+      <nav aria-label="Main" style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
         {NAV.map((item) => {
-          const active = pathname === item.to;
+          const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
           return (
             <Link
               key={item.to}
               to={item.to}
+              aria-current={active ? "page" : undefined}
               style={{
                 padding: "0.375rem 0.75rem",
                 borderRadius: "0.5rem",

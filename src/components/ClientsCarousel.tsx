@@ -21,11 +21,20 @@ const CSS = `
   animation: clients-marquee 30s linear infinite;
 }
 .clients-viewport:hover .clients-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .clients-track { animation: none; }
+  .clients-track > [aria-hidden] { display: none; }
+  .clients-viewport { overflow-x: auto; }
+}
 `;
 
 export function ClientsCarousel() {
-  // The list is rendered twice so translating by -50% loops seamlessly.
-  const slides = [...CLIENTS, ...CLIENTS];
+  // The list is rendered twice so translating by -50% loops seamlessly; the
+  // copy is hidden from assistive tech so logos aren't announced twice.
+  const slides = [
+    ...CLIENTS.map((client) => ({ ...client, duplicate: false })),
+    ...CLIENTS.map((client) => ({ ...client, duplicate: true })),
+  ];
 
   return (
     <section style={{ padding: "3rem 0", textAlign: "center" }}>
@@ -56,10 +65,14 @@ export function ClientsCarousel() {
       >
         <div className="clients-track">
           {slides.map((client, i) => (
-            <div key={`${client.slug}-${i}`} style={{ padding: "0 2.5rem" }}>
+            <div
+              key={`${client.slug}-${i}`}
+              aria-hidden={client.duplicate || undefined}
+              style={{ padding: "0 2.5rem" }}
+            >
               <img
                 src={`https://cdn.simpleicons.org/${client.slug}`}
-                alt={client.name}
+                alt={client.duplicate ? "" : client.name}
                 title={client.name}
                 height={32}
                 draggable={false}

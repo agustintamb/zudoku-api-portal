@@ -8,8 +8,9 @@ export function AppFooter({ slim = false }: { slim?: boolean }) {
   const columns = FOOTER.columns;
 
   if (slim) {
+    // A <div>, not a <footer>: the slot already renders inside Zudoku's <footer>.
     return (
-      <footer
+      <div
         data-app-footer
         style={{
           borderTop: "1px solid hsl(var(--border))",
@@ -18,6 +19,7 @@ export function AppFooter({ slim = false }: { slim?: boolean }) {
         }}
       >
         <nav
+          aria-label="Footer"
           style={{
             display: "flex",
             flexWrap: "wrap",
@@ -39,7 +41,7 @@ export function AppFooter({ slim = false }: { slim?: boolean }) {
             </Link>
           ))}
         </nav>
-      </footer>
+      </div>
     );
   }
 

@@ -162,7 +162,14 @@ const config: ZudokuConfig = {
   },
 
   // ─── Redirects ────────────────────────────────────────────────────────────
-  redirects: [{ from: "/", to: "/home" }],
+  redirects: [
+    { from: "/", to: "/home" },
+    // Legacy routes from before the API store moved under /api-store
+    { from: "/api/*", to: "/api-store/petstore/*" },
+    { from: "/blog-api/*", to: "/api-store/blog/*" },
+    { from: "/auth-api/*", to: "/api-store/auth/*" },
+    { from: "/slots-demo", to: "/slots" },
+  ],
 
   // ─── OpenAPI Specs ────────────────────────────────────────────────────────
   apis: [
